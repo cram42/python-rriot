@@ -67,6 +67,10 @@ class BasicAPI(object):
         """Get the correct URL for a given email."""
         return self.post(BC.PATH_URL, {"email": email}).get("url")
 
+    def get_home_details(self) -> dict:
+        """Get home details."""
+        return self.get(BC.PATH_HOMEDETAILS)
+
     def set_parameters(
         self,
         url: Optional[str] = None,

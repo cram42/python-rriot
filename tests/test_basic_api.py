@@ -20,7 +20,7 @@ TEST_USERNAME_INVALID = TEST_EMAIL
 TEST_PASSWORD_INVALID = "test-password"
 
 
-def simulate_response(request, context):
+def simulate_response(request, _context):
     """Simulate basic API responses."""
     base_url = f"{request.scheme}://{request.hostname}"
 
@@ -90,24 +90,24 @@ def test_login(_prepare):
     assert isinstance(rriot_data, RRIOTData)
 
 
-def test_get(_prepare):
-    """Test get()."""
+def test_get_home_details(_prepare):
+    """Test get_home_details()."""
     api = BasicAPI()
     api.set_parameters(
         url=C.NEW_URL,
         token=C.MOCK_TOKEN,
     )
-    home_details = api.get(BC.PATH_HOMEDETAILS)
+    home_details = api.get_home_details()
     assert isinstance(home_details, dict)
 
 
-def test_get_invalidtoken(_prepare):
-    """Test get() with an invalid token."""
+def test_get_home_details_invalidtoken(_prepare):
+    """Test get_home_details() with an invalid token."""
     api = BasicAPI()
     api.set_parameters(
         url=C.NEW_URL,
         token=C.MOCK_TOKEN_FAIL,
     )
     with pytest.raises(Exception) as exc_info:
-        api.get(BC.PATH_HOMEDETAILS)
+        api.get_home_details()
     assert exc_info.type is InvalidTokenException
