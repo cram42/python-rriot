@@ -17,3 +17,11 @@ class BasicAPIConstants(object):
     UNIQUE_IDENTIFIER: str = "python-rriot"
 
     DEFAULT_TIMEOUT: int = 3
+
+
+class HawkAPIConstants(object):
+    """Constants for use in the HawkAPI class."""
+
+    PATH_HOMEDETAILS: str = "/v2/user/homes/{home_id}"
+
+    DEFAULT_TIMEOUT: int = 3

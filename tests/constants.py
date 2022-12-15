@@ -1,6 +1,21 @@
 """Constants for testing."""
 
 
+class RRIOTDataConstants(object):
+    """Constants for testing RRIOTData."""
+
+    BASIC_URL = "mock://basic.url"
+    HAWK_URL = "mock://hawk.url"
+    MQTT_URL = "mock://mqtt.url:1234"
+    EMAIL = "mock.email@mock.url"
+    EMAIL_INVALID_FORMAT = "mock.email#mock.url"
+    USERNAME = "USERNAME123456"
+    SECRET = "SECRET123456"
+    HASH = "HASH123456"
+    HOME_ID = 123456
+    KEY = "KEY123456"
+
+
 class BasicAPIConstants(object):
     """Constants for testing BasicAPI."""
 
@@ -82,15 +97,30 @@ class BasicAPIConstants(object):
     }
 
 
-class RRIOTDataConstants(object):
-    """Constants for testing RRIOTData."""
+class HawkAPIConstants(object):
+    """Constants for testing HawkAPI."""
 
-    BASIC_URL = "https://example.basic.url"
-    HAWK_URL = "https://example.hawk.url"
-    MQTT_URL = "ssl://example.mqtt.url:1234/"
-    EMAIL = "example.email@mailserver.url"
-    USERNAME = "USERNAME123456"
-    SECRET = "SECRET123456"
-    HASH = "HASH123456"
-    HOME_ID = 123456
-    KEY = "KEY123456"
+    _DATA = RRIOTDataConstants()
+
+    URL = _DATA.HAWK_URL
+    USERNAME = _DATA.USERNAME
+    SECRET = _DATA.SECRET
+    HASH = _DATA.HASH
+    HOME_ID = _DATA.HOME_ID
+
+    RESPONSE_HOMEDETAILS = {
+        "api": "api-name-in-chinese",
+        "result": {
+            "id": _DATA.HOME_ID,
+            "name": "home-name",
+            "lon": None,
+            "lat": None,
+            "geoName": None,
+            "products": [],
+            "devices": [],
+            "receivedDevices": [],
+            "rooms": [],
+        },
+        "status": "ok",
+        "success": True,
+    }
