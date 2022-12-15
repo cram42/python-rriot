@@ -19,15 +19,15 @@ class RRIOTDataConstants(object):
 class BasicAPIConstants(object):
     """Constants for testing BasicAPI."""
 
-    HOSTNAME = "basic.url"
-    NEW_URL = f"mock://{HOSTNAME}"
+    _DATA = RRIOTDataConstants()
 
-    MOCK_EMAIL = "mock.email@mock.url"
-    MOCK_EMAIL_FAIL = "mock.email#mock.url"
-    MOCK_PASSWORD = "mock.password"
-    MOCK_PASSWORD_FAIL = "mock.password.fail"
-    MOCK_TOKEN = "token-data-in-base64-encoding"
-    MOCK_TOKEN_FAIL = "invalid-token-value"
+    URL = _DATA.BASIC_URL
+    EMAIL = _DATA.EMAIL
+    EMAIL_INVALID_FORMAT = _DATA.EMAIL_INVALID_FORMAT
+    PASSWORD = "mock.password"
+    PASSWORD_INVALID = "mock.password.fail"
+    TOKEN = "token-value"
+    TOKEN_INVALID = "invalid-token-value"
 
     RESPONSE_URL_EMAIL_INVALID = {
         "msg": "email format error",
@@ -39,7 +39,7 @@ class BasicAPIConstants(object):
         "code": 200,
         "msg": "success",
         "data": {
-            "url": NEW_URL,
+            "url": URL,
         },
     }
 
@@ -49,21 +49,21 @@ class BasicAPIConstants(object):
         "data": {
             "uid": 1234567,
             "tokentype": "",
-            "token": MOCK_TOKEN,
+            "token": TOKEN,
             "rruid": "rr0123456789abcdef",
             "region": "eu",
             "countrycode": "61",
             "country": "AU",
             "nickname": "nickname-value",
             "rriot": {
-                "u": "rriot-username-value",
-                "s": "rriot-secret-value",
-                "h": "rriot-hash-value",
-                "k": "rriot-key-value",
+                "u": _DATA.USERNAME,
+                "s": _DATA.SECRET,
+                "h": _DATA.HASH,
+                "k": _DATA.KEY,
                 "r": {
                     "r": "EU",
-                    "a": "mock://hawk.url",
-                    "m": "mock://mqtt.url:8883",
+                    "a": _DATA.HAWK_URL,
+                    "m": _DATA.MQTT_URL,
                     "l": "mock://unknown.url",
                 },
                 "tuyaDeviceState": 0,
@@ -85,7 +85,7 @@ class BasicAPIConstants(object):
             "id": 1234567,
             "name": "home-name",
             "tuyaHomeId": 0,
-            "rrHomeId": 7654321,
+            "rrHomeId": _DATA.HOME_ID,
             "deviceListOrder": None,
         },
     }
