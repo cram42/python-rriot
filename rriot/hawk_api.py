@@ -18,14 +18,15 @@ from .exceptions import (
 
 
 class HawkAPI(Session):
-    """Class for communicating with the HAWK-auth RRIOT API."""
+    """Class for communicating with the Hawk-Auth RRIOT API."""
 
-    _base_url: str
-    _username: str
-    _secret: str
-    _hash: str
-    _home_id: int
+    _base_url: str = ""
     _timeout: int = HC.DEFAULT_TIMEOUT
+    _home_id: int = 0
+
+    _username: str = ""
+    _secret: str = ""
+    _hash: str = ""
 
     def setup(
         self,
@@ -34,7 +35,7 @@ class HawkAPI(Session):
         secret: str,
         hmac_hash: str,
         home_id: int,
-    ):
+    ) -> None:
         """Set variables for future requests."""
         self._base_url = base_url
         self._username = username
