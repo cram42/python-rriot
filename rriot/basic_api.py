@@ -71,6 +71,11 @@ class BasicAPI(object):
         """Get home details."""
         return self.get(BC.PATH_HOMEDETAILS)
 
+    def test(self) -> bool:
+        """Test whether we can make requests."""
+        self.get(BC.PATH_HOMEDETAILS)
+        return True
+
     def set_parameters(
         self,
         url: Optional[str] = None,
