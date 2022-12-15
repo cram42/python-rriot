@@ -1,13 +1,13 @@
 """File for BasicAPI class."""
 
-from typing import Optional
-
 import base64
 import hashlib
-import requests
+from requests import Session
+from requests.exceptions import HTTPError
 
 from .rriot_data import RRIOTData
 from .constants import BasicAPIConstants as BC
+
 from .exceptions import (
     InvalidCredentialsException,
     InvalidEmailFormatException,
@@ -17,13 +17,14 @@ from .exceptions import (
 )
 
 
-class BasicAPI(object):
+class BasicAPI(Session):
     """Class for communicating with the basic RRIOT API."""
 
-    _clientid: str = ""
+    _base_url: str = BC.DEFAULT_URL
     _timeout: int = BC.DEFAULT_TIMEOUT
+
+    _clientid: str = ""
     _token: str = ""
-    _url: str = BC.DEFAULT_URL
 
     def login(self, username: str, password: str) -> RRIOTData:
         """Login and retrieve RRIOTData."""
@@ -31,7 +32,10 @@ class BasicAPI(object):
         self._clientid = self._generate_clientid(username)
 
         # Update URL
-        self._url = self.get_url_for_email(username)
+        self._base_url = self.get_url_for_email(username)
+
+        # Set auth handler
+        self.auth = self._build_auth
 
         # Login
         login_data = self.post(
@@ -52,7 +56,7 @@ class BasicAPI(object):
         rriot = login_data.get("rriot", {})
         urls = rriot.get("r", {})
         rriot_data = RRIOTData()
-        rriot_data.basic_url = self._url
+        rriot_data.basic_url = self._base_url
         rriot_data.hawk_url = urls.get("a", "")
         rriot_data.mqtt_url = urls.get("m", "")
         rriot_data.email = username
@@ -63,91 +67,97 @@ class BasicAPI(object):
         rriot_data.home_id = home_data.get("rrHomeId")
         return rriot_data
 
+    def request(self, method, url, *args, timeout=None, **kwargs):
+        """Override to modify the request and pass it along."""
+        # Prepend base URL
+        url = self._base_url + url
+
+        # Set timeout
+        if timeout is None:
+            timeout = self._timeout
+
+        # Make request
+        response = super().request(
+            method, url, *args, timeout=timeout, **kwargs
+        )
+
+        # Process and return response
+        return self._process_response(response)
+
+    def setup(self, base_url: str, username: str, token: str) -> bool:
+        """Manually set parameters."""
+        # Update ClientID
+        self._clientid = self._generate_clientid(username)
+
+        # Update URL
+        self._base_url = base_url
+
+        # Update token
+        self._token = token
+
+        # Set auth handler
+        self.auth = self._build_auth
+
+        # Return
+        return self.test()
+
     def get_url_for_email(self, email: str) -> str:
         """Get the correct URL for a given email."""
         return self.post(BC.PATH_URL, {"email": email}).get("url")
 
-    def get_home_details(self) -> dict:
-        """Get home details."""
-        return self.get(BC.PATH_HOMEDETAILS)
-
     def test(self) -> bool:
         """Test whether we can make requests."""
-        self.get(BC.PATH_HOMEDETAILS)
-        return True
+        return isinstance(self.get(BC.PATH_HOMEDETAILS), dict)
 
-    def set_parameters(
-        self,
-        url: Optional[str] = None,
-        username: Optional[str] = None,
-        token: Optional[str] = None,
-    ) -> None:
-        """Manually set parameters."""
-        if url:
-            self._url = url
-        if username:
-            self._clientid = self._generate_clientid(username)
-        if token:
-            self._token = token
-
-    def get(self, path: str) -> dict:
-        """Make a GET request."""
-        url = self._url + path
-        headers = self._get_headers(path)
-        response = requests.get(
-            url=url,
-            headers=headers,
-            timeout=self._timeout,
-        )
-        return self._process_response(response)
-
-    def post(self, path: str, params: dict) -> dict:
-        """Make a POST request."""
-        url = self._url + path
-        headers = self._get_headers(path)
-        response = requests.post(
-            url=url,
-            headers=headers,
-            data=params,
-            timeout=self._timeout,
-        )
-        return self._process_response(response)
-
-    def _get_headers(self, path: str) -> dict:
-        """Get headers required for a given path."""
-        if (path == BC.PATH_LOGIN) or (path == BC.PATH_URL):
-            return {"header_clientid": self._clientid}
-        else:
-            return {"Authorization": self._token}
+    def _build_auth(self, request):
+        """Modify the request by injecting auth header."""
+        request.headers["header_clientid"] = self._clientid
+        if (
+            request.path_url != BC.PATH_LOGIN
+            and request.path_url != BC.PATH_URL
+        ):
+            request.headers["authorization"] = self._token
+        return request
 
     def _generate_clientid(self, username: str) -> str:
         """Generate a clientid for a given username."""
-        id_hash = hashlib.md5()
-        id_hash.update(str.encode(username))
-        id_hash.update(str.encode(BC.UNIQUE_IDENTIFIER))
-        return base64.b64encode(id_hash.digest()).decode()
+        return base64.b64encode(
+            hashlib.md5(
+                str.encode(username + BC.UNIQUE_IDENTIFIER),
+            ).digest()
+        ).decode()
 
-    def _process_response(self, response: requests.Response) -> dict:
+    def _process_response(self, response) -> dict:
         """Check a response is valid and extract data."""
-        if response.status_code != 200:
-            raise requests.exceptions.HTTPError(response.status_code, response)
+        # Check for unexpected HTTP status
+        if response.status_code not in [200]:
+            raise HTTPError(response.status_code, response)
+
+        # Get JSON data
         data = response.json()
         if data is None:
             raise NoDataException(response)
-        if ("data" not in data) or (data.get("data") is None):
-            if "code" in data:
-                code = data.get("code")
-                msg = data.get("msg") if ("msg" in data) else "No Message"
-                if code == 2003:
-                    raise InvalidEmailFormatException(code, msg)
-                if code == 2010:
-                    raise InvalidTokenException(code, msg)
-                if code == 2012:
-                    raise InvalidCredentialsException(code, msg)
-                if code == 9002:
-                    raise RequestFrequencyException(code, msg)
-                raise NoDataException(code, msg)
-            raise NoDataException(response)
-        inner_data = data.get("data")
 
+        # Get data parts
+        code = data.get("code", None)
+        msg = data.get("msg", None)
+        inner_data = data.get("data", None)
+
+        # Handle codes
+        if code and code != 200:
+            if code == 2003:
+                raise InvalidEmailFormatException(code, msg)
+            if code == 2010:
+                raise InvalidTokenException(code, msg)
+            if code == 2012:
+                raise InvalidCredentialsException(code, msg)
+            if code == 9002:
+                raise RequestFrequencyException(code, msg)
+            raise NoDataException(code, msg)
+
+        # Handle null data
+        if inner_data is None:
+            raise NoDataException(data)
+
+        # return data
         return inner_data

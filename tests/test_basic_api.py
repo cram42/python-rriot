@@ -88,15 +88,15 @@ def test_login(_prepare):
 def test_get_home_details(_prepare):
     """Test get_home_details()."""
     api = BasicAPI()
-    api.set_parameters(url=C.URL, token=C.TOKEN)
-    home_details = api.get_home_details()
+    api.setup(C.URL, C.EMAIL, C.TOKEN)
+    home_details = api.get(BC.PATH_HOMEDETAILS)
     assert isinstance(home_details, dict)
 
 
 def test_get_home_details_invalidtoken(_prepare):
     """Test get_home_details() with an invalid token."""
     api = BasicAPI()
-    api.set_parameters(url=C.URL, token=C.TOKEN_INVALID)
     with pytest.raises(Exception) as exc_info:
-        api.get_home_details()
+        api.setup(C.URL, C.EMAIL, C.TOKEN_INVALID)
+        api.get(BC.PATH_HOMEDETAILS)
     assert exc_info.type is InvalidTokenException
