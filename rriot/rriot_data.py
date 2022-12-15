@@ -9,6 +9,7 @@ class RRIOTData(object):
     mqtt_url: str
 
     email: str
+    token: str
     username: str
     secret: str
     hash: str

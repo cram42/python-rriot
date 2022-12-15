@@ -47,7 +47,7 @@ class BasicAPI(Session):
             },
         )
         # Update token
-        self._token = login_data.get("token")
+        self._token = login_data.get("token", "")
 
         # Get home details
         home_data = self.get(BC.PATH_HOMEDETAILS)
@@ -60,6 +60,7 @@ class BasicAPI(Session):
         rriot_data.hawk_url = urls.get("a", "")
         rriot_data.mqtt_url = urls.get("m", "")
         rriot_data.email = username
+        rriot_data.token = self._token
         rriot_data.username = rriot.get("u", "")
         rriot_data.secret = rriot.get("s", "")
         rriot_data.hash = rriot.get("h", "")
