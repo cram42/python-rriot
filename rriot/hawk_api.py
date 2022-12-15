@@ -9,7 +9,7 @@ import time
 from requests import Session
 from requests.exceptions import HTTPError
 
-# from .constants import HawkAPIConstants as HC
+from .constants import HawkAPIConstants as HC
 from .exceptions import (
     NoDataException,
     InvalidCredentialsException,
@@ -25,6 +25,7 @@ class HawkAPI(Session):
     _secret: str
     _hash: str
     _home_id: int
+    _timeout: int = HC.DEFAULT_TIMEOUT
 
     def setup(
         self,
@@ -42,7 +43,7 @@ class HawkAPI(Session):
         self._home_id = home_id
         self.auth = self._build_auth
 
-    def request(self, method, url, *args, **kwargs):
+    def request(self, method, url, *args, timeout=None, **kwargs):
         """Override to modify the request and pass it along."""
         # Prepend base URL
         url = self._base_url + url
@@ -50,8 +51,14 @@ class HawkAPI(Session):
         # Substitute URL variables
         url = str.format(url, home_id=self._home_id)
 
+        # Set timeout
+        if timeout is None:
+            timeout = self._timeout
+
         # Make request
-        response = super().request(method, url, *args, **kwargs)
+        response = super().request(
+            method, url, *args, timeout=timeout, **kwargs
+        )
 
         # Process and return response
         return self._process_response(response)
