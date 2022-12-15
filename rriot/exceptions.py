@@ -9,17 +9,17 @@ class NoDataException(RRIOTException):
     """Exception when a response has no data."""
 
 
-class InvalidCredentialsException(NoDataException):
+class InvalidCredentialsException(RRIOTException):
     """Exception when the provided credentials were invalid."""
 
 
-class InvalidEmailFormatException(NoDataException):
+class InvalidEmailFormatException(RRIOTException):
     """Exception when the provided email was in the wrong format."""
 
 
-class InvalidTokenException(NoDataException):
+class InvalidTokenException(RRIOTException):
     """Exception when the provided auth token was invalid."""
 
 
-class RequestFrequencyException(NoDataException):
+class RequestFrequencyException(RRIOTException):
     """Exception when the API has been accessed too frequently."""
