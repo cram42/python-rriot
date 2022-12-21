@@ -44,7 +44,15 @@ class HawkAPI(Session):
         self._home_id = home_id
         self.auth = self._build_auth
 
-    def request(self, method, url, *args, timeout=None, **kwargs):
+    def get(self, url, **kwargs) -> dict:
+        """Override to return dict."""
+        return self.request("GET", url, **kwargs)
+
+    def post(self, url, data=None, json=None, **kwargs) -> dict:
+        """Override to return dict."""
+        return self.request("POST", url, data=data, json=json, **kwargs)
+
+    def request(self, method, url, *args, timeout=None, **kwargs) -> dict:
         """Override to modify the request and pass it along."""
         # Prepend base URL
         url = self._base_url + url

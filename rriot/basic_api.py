@@ -65,10 +65,18 @@ class BasicAPI(Session):
         rriot_data.secret = rriot.get("s", "")
         rriot_data.hash = rriot.get("h", "")
         rriot_data.key = rriot.get("k", "")
-        rriot_data.home_id = home_data.get("rrHomeId")
+        rriot_data.home_id = home_data.get("rrHomeId", -1)
         return rriot_data
 
-    def request(self, method, url, *args, timeout=None, **kwargs):
+    def get(self, url, **kwargs) -> dict:
+        """Override to return dict."""
+        return self.request("GET", url, **kwargs)
+
+    def post(self, url, data=None, json=None, **kwargs) -> dict:
+        """Override to return dict."""
+        return self.request("POST", url, data=data, json=json, **kwargs)
+
+    def request(self, method, url, *args, timeout=None, **kwargs) -> dict:
         """Override to modify the request and pass it along."""
         # Prepend base URL
         url = self._base_url + url
@@ -104,7 +112,9 @@ class BasicAPI(Session):
 
     def get_url_for_email(self, email: str) -> str:
         """Get the correct URL for a given email."""
-        return self.post(BC.PATH_URL, {"email": email}).get("url")
+        return self.post(BC.PATH_URL, {"email": email}).get(
+            "url", BC.DEFAULT_URL
+        )
 
     def test(self) -> bool:
         """Test whether we can make requests."""

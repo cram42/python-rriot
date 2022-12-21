@@ -1,6 +1,6 @@
 """Tests for BasicAPI class."""
 
-import urllib
+from urllib.parse import parse_qs
 import pytest
 
 from rriot.basic_api import BasicAPI
@@ -21,8 +21,8 @@ def simulate_response(request, _context):
 
     if base_url == str.lower(BC.DEFAULT_URL):
         if request.path_url == BC.PATH_URL:
-            form_data = urllib.parse.parse_qs(request.text)
-            email = form_data.get("email")[0]
+            form_data = parse_qs(request.text)
+            email = form_data.get("email", [])[0]
             if email == C.EMAIL:
                 return C.RESPONSE_URL
             elif email == C.EMAIL_INVALID_FORMAT:
@@ -31,9 +31,9 @@ def simulate_response(request, _context):
     elif base_url == str.lower(C.URL):
 
         if request.path_url == BC.PATH_LOGIN:
-            form_data = urllib.parse.parse_qs(request.text)
-            username = form_data.get("username")[0]
-            password = form_data.get("password")[0]
+            form_data = parse_qs(request.text)
+            username = form_data.get("username", [])[0]
+            password = form_data.get("password", [])[0]
             if (username == C.EMAIL) and (password == C.PASSWORD):
                 return C.RESPONSE_LOGIN
             else:
