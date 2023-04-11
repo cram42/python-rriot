@@ -1,0 +1,9 @@
+{
+    "name": "python-rriot Dev Container",
+    "build": {
+        "context": "..",
+        "dockerfile": "Dockerfile",
+        "args": {}
+    },
+    "customizations": {}
+}

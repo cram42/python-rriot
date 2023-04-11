@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=64.0", "wheel", "setuptools-git-versioning<2"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools-git-versioning]
+enabled = true
+
+[project]
+name = "python-rriot"
+description = "Python RRIOT is a library written in Python 3 for interfacing with Roborock's IoT API"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file="LICENSE" }
+authors = [
+    { name="Grant Le Roux", email="grant.leroux+python-rriot@gmail.com" }
+]
+classifiers = [
+    "Programming Language :: Python :: 3.11",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Operating System :: OS Independent"
+]
+dynamic = ["version"]
+
+[project.urls]
+"Homepage" = "https://github.com/cram42/python-rriot"
